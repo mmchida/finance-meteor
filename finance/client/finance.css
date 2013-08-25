@@ -1,0 +1,5 @@
+/* CSS declarations go here */
+.table thead th { text-align: center; }
+td.check { text-align: center;}
+#accountsMenu { margin-right: 10px; }
+th.trash, td.trash { width: 15px; text-align: center; }

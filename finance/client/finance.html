@@ -1,0 +1,358 @@
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finance</title>
+</head>
+
+<body>
+	<div class="container">
+		{{loginButtons}}
+		<h1>Controle de Finanças</h1>
+	  {{#if currentUser}}
+	  	{{> initPage}}
+	  {{else}}
+	  	<div>
+	  		<strong>Favor logar-se para usar a aplicação.</strong>
+	  	</div>
+	  {{/if}}
+	</div>
+</body>
+
+<template name="initPage">
+	{{#if isAdmin}}
+		{{> initAdminPage}}
+	{{else}}
+		{{> userPage}}
+	{{/if}}
+</template>
+
+<template name="initAdminPage">
+	<div>
+		<ul class="nav nav-tabs">
+			{{#each pages}}
+			<li class="{{active}}"><a href="#" class="adminPageTab">{{description}}</a></li>
+			{{/each}}
+		</ul>
+	</div>
+	<div>
+		{{#if userPage}}
+			{{> userPage}}
+		{{else}}
+			{{> adminPage}}
+		{{/if}}
+	</div>
+</template>
+
+<template name="userPage">
+	<div class="row">
+		<div class="span2">
+			{{> accountsMenu}}
+		</div>
+		<div class="span10">
+			<div class="row">
+				{{> addTransaction}}
+			</div>
+			<div class="row">
+				{{> panes}}
+			</div>
+		</div>
+	</div>
+</template>
+
+<template name="addTransaction">
+	<div>
+		<div class="input-append">
+			<input type="text" id="addTransaction" class="span9" placeholder="@Conta #Tag1 #Tag2 -130.50 descrição on 17 Jul" autocomplete="off">
+			<button type="button" class="btn" id="addTransactionBtn">Adicionar</button>
+		</div>
+		{{> accountsDropDown}}
+		{{> tagsDropDown}}
+	</div>
+</template>
+
+<template name="accountsDropDown">
+	<div class="dropdown">
+		<a href="#" id="accountsDropDown" class="dropdown-toggle" data-toggle="dropdown" role="button"></a>
+		<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+			{{#each accounts}}
+			<li role="presentation"><a href="#" class="accountsDropDownTab">{{name}}</li>
+			{{/each}}
+		</ul>
+	</div>
+</template>
+
+<template name="tagsDropDown">
+	<div class="dropdown">
+		<a href="#" id="tagsDropDown" class="dropdown-toggle" data-toggle="dropdown" role="button"> </a>
+		<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+			{{#each tags}}
+			<li role="presentation"><a href="#" class="tagsDropDownTab">{{name}}</li>
+			{{/each}}
+		</ul>
+	</div>
+</template>
+
+<template name="accountsMenu">
+	<div id="accountsMenu">
+		<ul class="nav nav-tabs nav-stacked">
+			<li class="{{allAccountsActive}}"><a href="#allAccounts" class="accountsMenuTab">Todas as contas: <span style="color:{{total.color}}">{{total.balance}}</span></a></li>
+			{{#each accounts}}
+			<li class="{{active}}"><a href="#" class="accountsMenuTab">{{name}}: <span style="color:{{color}}">{{formattedBalance}}</span></a></li>
+			{{/each}}
+			<li><a href="#addAccount" class="accountsMenuTab" data-toggle="modal">+ Adicionar conta</a></li>
+		</ul>
+	</div>
+	{{> addAccount}}
+	{{> updateAccount}}
+</template>
+
+<template name="addAccount">
+	<div id="addAccount" class="modal hide fade">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal">&times;</button>
+			<h4>Adicionar Conta</h4>
+		</div>
+		<div class="modal-body form-inline">
+			<input type="text" id="name" placeholder="Nome da conta">
+			<input type="text" id="balance" placeholder="Saldo">
+		</div>
+		<div class="modal-footer">
+			<a href="#" class="btn" data-dismiss="modal">Fechar</a>
+			<a href="#" class="btn btn-primary" id="addAccountBtn">Adicionar</a>
+		</div>
+	</div>
+</template>
+
+<template name="updateAccount">
+	<div id="updateAccount" class="modal hide fade">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal">&times;</button>
+			<h4>Atualizar Conta</h4>
+		</div>
+		<div class="modal-body form-inline">
+			<input type="hidden" id="id" value="{{account.id}}">
+			<input type="text" id="name" placeholder="Nome da conta" value="{{account.name}}">
+			<input type="text" id="balance" placeholder="Saldo" value="{{account.balance}}">
+		</div>
+		<div class="modal-footer">
+			<a href="#" class="btn" data-dismiss="modal">Fechar</a>
+			<a href="#" class="btn btn-primary" id="updateAccountBtn">Atualizar</a>
+		</div>
+	</div>
+</template>
+
+
+<template name="panes">
+	<div>
+		<ul class="nav nav-tabs">
+			{{#each panes}}
+			<li class="{{active}}"><a href="#" class="panesTab">{{name}}</a></li>
+			{{/each}}
+		</ul>
+	</div>
+	<div>
+		{{#if showTransactionsPanel}}
+			{{> transactionsPane}}
+		{{else}}
+			{{> tagsPanel}}
+		{{/if}}
+	</div>
+</template>
+
+<template name="transactionsPane">
+	<div class="table-wrapper">
+		<table class="table table-bordered table-hover" id="transactions">
+			<thead>
+				<tr>
+					<th>Conta</th>
+					<th>Tags</th>
+					<th>Valor</th>
+					<th>Descrição</th>
+					<th>Data</th>
+					<th class="trash"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each transactions}}
+				<tr>
+					<td>{{account}}</td>
+					<td>{{formattedTags}}</td>
+					<td style="color:{{color}}">{{formattedValue}}</td>
+					<td>{{description}}</td>
+					<td>{{formattedDate}}</td>
+					<td class="trash"><a href='#' class="icon-trash"></a></td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+</template>
+
+<template name="tagsPanel">
+	<div class="table-wrapper">
+		<table class="table table-bordered table-hover">
+			<thead>
+				<tr>
+					<th>Nome</th>
+					<th>Total</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each tags}}
+				<tr>
+					<td>{{name}}</td>
+					<td style="color:{{total.color}}">{{total.total}}</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+</template>
+
+<template name="adminPage">
+	<div>
+		<ul class="nav nav-tabs">
+			{{#each entities}}
+			<li class="{{active}}"><a href="#" class="adminPageTab">{{name}}</a></li>
+			{{/each}}
+		</ul>
+		<div>
+			{{#if showUsers}}
+				{{> usersCrud}}
+			{{else}}
+				{{#if showAdminUsers}}
+					{{> adminUsersCrud}}
+				{{else}}
+					{{#if showAccounts}}
+						{{> accountsCrud}}
+					{{else}}
+						{{#if showTags}}
+							{{> tagsCrud}}
+						{{else}}
+							{{#if showTransactions}}
+								{{> transactionsCrud}}
+							{{/if}}
+						{{/if}}
+					{{/if}}
+				{{/if}}
+			{{/if}}
+			<div>
+				<a href="#" class="btn btn-primary" id="removeBtn">Excluir</a>
+			</div>
+		</div>
+	</div>
+</template>
+
+<template name="usersCrud">
+	<table class="table table-bordered table-hover" id="usersCrud">
+		<thead>
+			<tr>
+				<th><input type="checkbox"></th>
+				<th>ID</th>
+				<th>Nome</th>
+			</tr>		
+		</thead>
+		<tbody>
+			{{#each users}}
+			<tr>
+				<td class="check"><input type="checkbox" value="{{_id}}"></td>
+				<td>{{_id}}</td>
+				<td>{{profile.name}}</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</template>
+
+<template name="adminUsersCrud">
+	<table class="table table-bordered table-hover" id="adminUsersCrud">
+		<thead>
+			<tr>
+				<th><input type="checkbox"></th>
+				<th>ID</th>
+				<th>Criado por</th>
+				<th>Data de Criação</th>
+			</tr>		
+		</thead>
+		<tbody>
+			{{#each adminUsers}}
+			<tr>
+				<td class="check"><input type="checkbox" value="{{_id}}"></td>
+				<td>{{userId}}</td>
+				<td>{{addedBy}}</td>
+				<td>{{createdDate}}</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</template>
+
+<template name="accountsCrud">
+	<table class="table table-bordered table-hover" id="accountsCrud">
+		<thead>
+			<tr>
+				<th><input type="checkbox"></th>
+				<th>Nome</th>
+				<th>User</th>
+			</tr>		
+		</thead>
+		<tbody>
+			{{#each accounts}}
+			<tr>
+				<td class="check"><input type="checkbox" value="{{_id}}"></td>
+				<td>{{name}}</td>
+				<td>{{userId}}</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</template>
+
+<template name="tagsCrud">
+	<table class="table table-bordered table-hover" id="tagsCrud">
+		<thead>
+			<tr>
+				<th><input type="checkbox"></th>
+				<th>Nome</th>
+				<th>User</th>
+			</tr>		
+		</thead>
+		<tbody>
+			{{#each tags}}
+			<tr>
+				<td class="check"><input type="checkbox" value="{{_id}}"></td>
+				<td>{{name}}</td>
+				<td>{{userId}}</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</template>
+
+<template name="transactionsCrud">
+	<table class="table table-bordered table-hover" id="transactionsCrud">
+		<thead>
+			<tr>
+				<th><input type="checkbox"></th>
+				<th>Conta</th>
+				<th>Tags</th>
+				<th>Valor</th>
+				<th>Descrição</th>
+				<th>Data</th>
+				<th>User</th>
+			</tr>		
+		</thead>
+		<tbody>
+			{{#each transactions}}
+			<tr>
+				<td class="check"><input type="checkbox" value="{{_id}}"></td>
+				<td>{{account}}</td>
+				<td>{{formattedTags}}</td>
+				<td>{{formattedValue}}</td>
+				<td>{{description}}</td>
+				<td>{{formattedDate}}</td>
+				<td>{{userId}}</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</template>
